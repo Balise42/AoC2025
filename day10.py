@@ -1,7 +1,8 @@
 import re
+import numpy as np
 
 def main():
-    lines = open('data/day10-sample.txt', 'r').readlines()
+    lines = open('data/day10.txt', 'r').readlines()
 
     regex = re.compile(r"""\[([.#]*)]+ ([\d,\(\)\s]+) {([\d,]+)}""")
     res = 0
@@ -30,33 +31,14 @@ def main():
                     break
         
         voltageList = [int(a) for a in strVoltages.split(',')]
-        end = ','.join(['0' for i in range(0, len(voltageList))])
-        visited = {}
-        visited[strVoltages] = 0
-        start = strVoltages
-        queue = [strVoltages]
-        while len(queue) > 0:
-            nodeStr = queue.pop(0)
-            node = [int(a) for a in nodeStr.split(',')]
-            minNode = max(node)
-            for i in node:
-                if i < minNode and i > 0:
-                    minNode = i
-            minIndex = node.index(minNode)
-            for toggle in toggleList:
-                if minIndex not in toggle:
-                    continue
-                neigh = makeNeigh2(nodeStr, toggle, minNode) 
-                if neigh in visited and visited[neigh] <= minNode + visited[nodeStr]:
-                    continue
-                visited[neigh] = visited[nodeStr] + minNode
-                queue.append(neigh)
-                if neigh == end:
-                    queue = []
-                    print(visited[neigh])
-                    res2 += visited[neigh]
-                    break
-
+        matrix = [[0 for i in range(len(toggleList))] for j in range(len(voltageList))]
+        for i in range(len(toggleList)):
+            t = toggleList[i]
+            for j in range(len(t)):
+                matrix[t[j]][i] = 1
+        matrix = np.matrix(matrix)
+        print(matrix)
+        print(voltageList)
     print(res)
     print(res2)
 
@@ -68,20 +50,5 @@ def makeNeigh(node, toggle):
         else:
             neigh += node[i]
     return neigh
-
-def makeNeigh2(nodeStr, toggle, minNode):
-    node = [int(a) for a in nodeStr.split(',')]
-    for i in range(0, len(node)):
-        if i in toggle:
-            node[i] -= minNode
-    return ','.join([str(i) for i in node])
-
-def invalid(neigh, voltage):
-    neighList = [int(a) for a in neigh.split(',')]
-    for i in range(0, len(neighList)):
-        if neighList[i] > voltage[i]:
-            return True
-    return False
-
 
 main()
